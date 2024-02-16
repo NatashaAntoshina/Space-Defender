@@ -72,7 +72,7 @@ class Laser():
 
 
 def main():
-    image = load_image("космический пейзаж.jpg")
+    image = load_image("вид4.png")
     pygame.init()
     pygame.display.set_caption('Space Defender')
     screen = pygame.display.set_mode(WINDOW_SIZE)
