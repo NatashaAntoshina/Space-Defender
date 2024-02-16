@@ -4,8 +4,8 @@ from random import *
 
 WINDOW_SIZE = WINDOW_WIDTH, WINDOW_HEIGHT = 800, 900
 MOVING_GUN = 15
-MOVING_LASER = 8
-FPS = 15
+MOVING_LASER = 10
+FPS = 40
 
 
 def load_image(name, colorkey=None):
@@ -72,14 +72,16 @@ class Laser():
 
 
 def main():
-    image = load_image("вид4.png")
+    lasers = []
+    flags = []
+    image = load_image("вид6.png")
     pygame.init()
     pygame.display.set_caption('Space Defender')
     screen = pygame.display.set_mode(WINDOW_SIZE)
     flag = False
 
     gun = Gun()
-    laser = Laser()
+
     clock = pygame.time.Clock()
     running = True
     while running:
@@ -88,17 +90,21 @@ def main():
                 running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
+                    laser = Laser()
+                    lasers.append(laser)
                     laser.fire(screen, gun.get_position(), gun.gun_size())
                     flag = True
+                    flags.append(flag)
         gun.move()
         screen.fill((0, 0, 0))
         screen.blit(image, (0, 0))
         gun.drawing(screen)
-        if flag:
-            laser.move()
-            laser.render(screen)
-            if laser.get_position()[1] - laser.get_size()[1] >= WINDOW_HEIGHT:
-                flag = False
+        for i in range(len(lasers)):
+            if flags[i]:
+                lasers[i].move()
+                lasers[i].render(screen)
+                if lasers[i].get_position()[1] - lasers[i].get_size()[1] >= WINDOW_HEIGHT:
+                    flags[i] = False
         pygame.display.flip()
         clock.tick(FPS)
     pygame.quit()
