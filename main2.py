@@ -47,29 +47,22 @@ class Gun():
         pygame.draw.rect(screen, pygame.Color('Orange'), (self.x, self.y, self.width, self.height), 0)
 
 
-class Laser():
-    def __init__(self):
-        self.width = 6
-        self.height = 30
-        self.x = 350
-        self.y = 350
+class Laser(pygame.sprite.Sprite):
+    image = load_image("laser.png")
+    def __init__(self, pos, *group):
+        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite.
+        # Это очень важно!!!
+        super().__init__(*group)
+        self.image = Laser.image
+        self.rect = self.image.get_rect()
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+        # вычисляем маску для эффективного сравнения
+        self.mask = pygame.mask.from_surface(self.image)
 
-    def render(self, screen):
-        pygame.draw.rect(screen, pygame.Color('Green'), (self.x, self.y, self.width, self.height), 0)
-
-    def fire(self, screen, position, size):
-        self.x = position[0] + size[0] // 2 - self.width // 2
-        self.y = position[1] - self.height
-        pygame.draw.rect(screen, pygame.Color('Green'), (self.x, self.y, self.width, self.height), 0)
-
-    def move(self):
-        self.y = self.y - MOVING_LASER
-
-    def get_size(self):
-        return self.width, self.height
-
-    def get_position(self):
-        return self.x, self.y
+    def update(self, barrier):
+        if not pygame.sprite.spritecollideany(self, barrier):
+            self.rect = self.rect.move(0, -20)
 
 
 class Spaceships(pygame.sprite.Sprite):
@@ -85,16 +78,20 @@ class Spaceships(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(WINDOW_WIDTH // 1.5)
         self.rect.y = 60
+        # вычисляем маску для эффективного сравнения
+        self.mask = pygame.mask.from_surface(self.image)
 
-    def update(self):
-        self.rect = self.rect.move(self.speed_x, self.speed_y)
+    def update(self, barrier):
+        if not pygame.sprite.spritecollideany(self, barrier):
+            self.rect = self.rect.move(self.speed_x, self.speed_y)
 
 
 def main():
-    all_sprites = pygame.sprite.Group()
+    ships = pygame.sprite.Group()
     for _ in range(5):
-        Spaceships(all_sprites)
-    lasers = []
+        Spaceships(ships)
+    lasers = pygame.sprite.Group()
+    # lasers = []
     flags = []
     image = load_image("вид6.png")
     pygame.init()
@@ -112,10 +109,8 @@ def main():
                 running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    laser = Laser()
-                    lasers.append(laser)
-
-                    laser.fire(screen, gun.get_position(), gun.gun_size())
+                    Laser(gun.get_position(), lasers)
+                    # lasers.fire(screen, gun.get_position(), gun.gun_size())
                     flag = True
                     flags.append(flag)
 
@@ -123,16 +118,18 @@ def main():
         screen.fill((0, 0, 0))
         screen.blit(image, (0, 0))
         gun.drawing(screen)
-        # рисуем корабли, которые двигаются
-        all_sprites.draw(screen)
-        all_sprites.update()
+        # рисуем srites, которые двигаются
+        ships.draw(screen)
+        ships.update(lasers)
+        lasers.draw(screen)
+        lasers.update(ships)
 
-        for i in range(len(lasers)):
-            if flags[i]:
-                lasers[i].move()
-                lasers[i].render(screen)
-                if lasers[i].get_position()[1] - lasers[i].get_size()[1] >= WINDOW_HEIGHT:
-                    flags[i] = False
+        # for i in range(len(lasers)):
+        #     if flags[i]:
+        #         lasers[i].move()
+        #         lasers[i].render(screen)
+        #         if lasers[i].get_position()[1] - lasers[i].get_size()[1] >= WINDOW_HEIGHT:
+        #             flags[i] = False
         pygame.display.flip()
         clock.tick(FPS)
     pygame.quit()
