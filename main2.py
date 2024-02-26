@@ -63,6 +63,8 @@ class Laser(pygame.sprite.Sprite):
     def update(self, barrier):
         if not pygame.sprite.spritecollideany(self, barrier):
             self.rect = self.rect.move(0, -20)
+        else:
+            self.kill()
 
 
 class Spaceships(pygame.sprite.Sprite):
@@ -84,6 +86,8 @@ class Spaceships(pygame.sprite.Sprite):
     def update(self, barrier):
         if not pygame.sprite.spritecollideany(self, barrier):
             self.rect = self.rect.move(0, self.speed_y)
+        else:
+            self.kill()
 
 
 def main():
