@@ -83,7 +83,7 @@ class Spaceships(pygame.sprite.Sprite):
 
     def update(self, barrier):
         if not pygame.sprite.spritecollideany(self, barrier):
-            self.rect = self.rect.move(self.speed_x, self.speed_y)
+            self.rect = self.rect.move(0, self.speed_y)
 
 
 def main():
@@ -109,7 +109,7 @@ def main():
                 running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    Laser(gun.get_position(), lasers)
+                    Laser((gun.get_position()[0]+10, gun.get_position()[1]-50), lasers)
                     # lasers.fire(screen, gun.get_position(), gun.gun_size())
                     flag = True
                     flags.append(flag)
