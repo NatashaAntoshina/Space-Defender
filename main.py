@@ -83,7 +83,7 @@ class Spaceships(pygame.sprite.Sprite):
         self.speed_x = random.randrange(1,3)
         self.speed_y = random.randrange(1, 3)
         self.rect = self.image.get_rect()
-        self.rect.x = random.randrange(WINDOW_WIDTH // 1.5)
+        self.rect.x = random.randrange(WINDOW_WIDTH)
         self.rect.y = 60
 
     def update(self):

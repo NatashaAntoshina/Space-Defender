@@ -5,8 +5,9 @@ import random
 
 WINDOW_SIZE = WINDOW_WIDTH, WINDOW_HEIGHT = 800, 900
 MOVING_GUN = 15
-MOVING_LASER = 10
+MOVING_LASER = 15
 FPS = 30
+fons = ['вид2.png', 'вид3.png', 'вид4.png', 'вид5.png', 'вид6.png']
 
 
 def load_image(name, colorkey=None):
@@ -76,7 +77,7 @@ class Spaceships(pygame.sprite.Sprite):
         self.speed_x = random.randrange(1,3)
         self.speed_y = random.randrange(1, 3)
         self.rect = self.image.get_rect()
-        self.rect.x = random.randrange(WINDOW_WIDTH // 1.5)
+        self.rect.x = random.randrange(WINDOW_WIDTH)
         self.rect.y = 60
         # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
@@ -93,7 +94,8 @@ def main():
     lasers = pygame.sprite.Group()
     # lasers = []
     flags = []
-    image = load_image("вид6.png")
+    fon = random.choice(fons)
+    image = load_image(fon)
     pygame.init()
     pygame.display.set_caption('Space Defender')
     screen = pygame.display.set_mode(WINDOW_SIZE)
