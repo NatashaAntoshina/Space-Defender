@@ -58,14 +58,14 @@ class Laser(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = pos[0]
         self.rect.y = pos[1]
+        self.k = 0
         # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
 
-    def update(self, barrier):
-        if not pygame.sprite.spritecollideany(self, barrier):
-            self.rect = self.rect.move(0, -20)
-        else:
-            self.kill()
+    def update(self):
+        if self.k:
+            self.rect.x += -40 / self.k
+        self.rect.y -= 40
 
 
 class Spaceships(pygame.sprite.Sprite):
@@ -84,11 +84,8 @@ class Spaceships(pygame.sprite.Sprite):
         # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
 
-    def update(self, barrier):
-        if not pygame.sprite.spritecollideany(self, barrier):
-            self.rect = self.rect.move(0, self.speed_y)
-        else:
-            self.kill()
+    def update(self):
+        self.rect = self.rect.move(0, self.speed_y)
 
 
 def main():
@@ -113,29 +110,26 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    Laser((gun.get_position()[0]+10, gun.get_position()[1]-50), lasers)
-                    # lasers.fire(screen, gun.get_position(), gun.gun_size())
-                    flag = True
-                    flags.append(flag)
+            if (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE) or (
+                    event.type == pygame.MOUSEBUTTONDOWN):
+                laser_x = gun.get_position()[0] + 10
+                laser_y = gun.get_position()[1] - 50
+                Laser((laser_x, laser_y), lasers)
 
-        gun.move()
         screen.fill((0, 0, 0))
         screen.blit(image, (0, 0))
+
+        gun.move()
         gun.drawing(screen)
         # рисуем srites, которые двигаются
         ships.draw(screen)
-        ships.update(lasers)
         lasers.draw(screen)
-        lasers.update(ships)
+        ships.update()
+        lasers.update()
+        # если лазер попадает в корабль, то удаляем и пульку, и корабль
+        for i in pygame.sprite.groupcollide(lasers, ships, True, True):
+            i.kill()
 
-        # for i in range(len(lasers)):
-        #     if flags[i]:
-        #         lasers[i].move()
-        #         lasers[i].render(screen)
-        #         if lasers[i].get_position()[1] - lasers[i].get_size()[1] >= WINDOW_HEIGHT:
-        #             flags[i] = False
         pygame.display.flip()
         clock.tick(FPS)
     pygame.quit()

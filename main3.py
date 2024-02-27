@@ -22,7 +22,7 @@ def load_image(name, colorkey=None):
     return image
 
 
-class Gun():
+class Gun:
     def __init__(self):
         self.width = 30
         self.height = 50
@@ -78,9 +78,9 @@ class Spaceships(pygame.sprite.Sprite):
         super().__init__(*group)
         self.image = Spaceships.image
         self.speed_x = random.randrange(1, 3)
-        self.speed_y = random.randrange(1, 4)
+        self.speed_y = random.randrange(2, 4)
         self.rect = self.image.get_rect()
-        self.rect.x = random.randrange(WINDOW_WIDTH)
+        self.rect.x = random.randrange(WINDOW_WIDTH - 50)
         self.rect.y = 60
         # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
@@ -89,9 +89,27 @@ class Spaceships(pygame.sprite.Sprite):
         self.rect = self.rect.move(0, self.speed_y)
 
 
+class Asteroids(pygame.sprite.Sprite):
+    image = load_image("asteroids.png")
+
+    def __init__(self, *group):
+        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite.
+        # Это очень важно!!!
+        super().__init__(*group)
+        self.image = Asteroids.image
+        self.rect = self.image.get_rect()
+        self.rect.x = random.randrange(WINDOW_WIDTH)
+        self.rect.y = random.randrange(100, WINDOW_HEIGHT-300)
+        # вычисляем маску для эффективного сравнения
+        self.mask = pygame.mask.from_surface(self.image)
+
+
 def main():
+    asteroids = pygame.sprite.Group()
+    for _ in range(4):
+        Asteroids(asteroids)
     ships = pygame.sprite.Group()
-    for _ in range(5):
+    for _ in range(25):
         Spaceships(ships)
     lasers = pygame.sprite.Group()
     flags = []
@@ -111,12 +129,16 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            if (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE) or (
-                    event.type == pygame.MOUSEBUTTONDOWN):
-                laser_x = gun.get_position()[0] + 10
-                laser_y = gun.get_position()[1] - 50
-                k = (pygame.mouse.get_pos()[1] - laser_y)/(pygame.mouse.get_pos()[0] - laser_x)
-                Laser((laser_x, laser_y), k, lasers)
+
+            laser_x = gun.get_position()[0] + 10
+            laser_y = gun.get_position()[1] - 35
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                k = (pygame.mouse.get_pos()[1] - laser_y) / (pygame.mouse.get_pos()[0] - laser_x)
+                new_laser = Laser((laser_x, laser_y), k, lasers)
+                # Rotate the image by any degree
+                # new_laser.image = pygame.transform.rotate(new_laser.image, 45)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                Laser((laser_x, laser_y), 0, lasers)
 
         screen.fill((0, 0, 0))
         screen.blit(image, (0, 0))
@@ -130,14 +152,13 @@ def main():
         # рисуем srites, которые двигаются
         ships.draw(screen)
         lasers.draw(screen)
+        asteroids.draw(screen)
         ships.update()
         lasers.update()
         # если лазер попадает в корабль, то удаляем и пульку, и корабль
-        for i in pygame.sprite.groupcollide(lasers, ships, True, True):
-            i.kill()
-
-
-
+        pygame.sprite.groupcollide(lasers, ships, True, True)
+        # Если лазер попадает в астероиды, то удаляем пульку
+        pygame.sprite.groupcollide(lasers, asteroids, True, False)
 
         pygame.display.flip()
         clock.tick(FPS)
