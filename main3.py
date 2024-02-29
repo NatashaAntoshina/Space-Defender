@@ -64,7 +64,8 @@ class Laser(pygame.sprite.Sprite):
         self.positions = pos
         self.rect.x = pos[0]
         self.rect.y = pos[1]
-        self.angle = 0  # угол, на который повернута пулька относительно вертикальной прямой (отсчитывается по часовой стрелке)
+        self.angle = 0  # угол, на который повернута пулька относительно вертикальной прямой
+        # (отсчитывается по часовой стрелке в градусах)
         self.k = k  # коэффициент наклона прямой dy/dx
         # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
@@ -113,6 +114,24 @@ class Asteroids(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
 
 
+class Mirror(pygame.sprite.Sprite):
+    image = load_image("mirror.png")
+
+    def __init__(self, *group):
+        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite.
+        # Это очень важно!!!
+        super().__init__(*group)
+        self.image = Mirror.image
+        self.rect = self.image.get_rect()
+        self.rect.x = 20
+        self.rect.y = 500
+        # угол, на который повернуто зеркало относительно вертикальной прямой
+        # (отсчитывается по часовой стрелке в градусах)
+        self.angle = 0
+        # вычисляем маску для эффективного сравнения
+        self.mask = pygame.mask.from_surface(self.image)
+
+
 class Button(pygame.sprite.Sprite):
     """Class used to create a button, use setCords to set
         position of topleft corner. Method pressed() returns
@@ -144,7 +163,7 @@ class Button(pygame.sprite.Sprite):
             return False
 
 
-# hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+# hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
 def terminate():
     pygame.quit()
     sys.exit()
@@ -312,7 +331,7 @@ def main():
                             pygame.mouse.get_pos()[0] - laser_x)
                 new_laser = Laser((laser_x, laser_y), k, lasers)
                 # Rotate the image by any degree
-                new_laser.angle = 90 - (math.atan(-k)*180/math.pi)
+                new_laser.angle = 90 - (math.atan(-k) * 180 / math.pi)
                 new_laser.image = pygame.transform.rotate(new_laser.origimage, new_laser.angle)
                 new_laser.rect = new_laser.image.get_rect(center=new_laser.positions)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
