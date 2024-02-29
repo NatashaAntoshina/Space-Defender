@@ -1,6 +1,7 @@
 import pygame
 import os
 import random
+import sys
 
 WINDOW_SIZE = WINDOW_WIDTH, WINDOW_HEIGHT = 800, 900
 MOVING_GUN = 15
@@ -85,6 +86,9 @@ class Spaceships(pygame.sprite.Sprite):
         # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
 
+    def get_position(self):
+        return self.rect.y
+
     def update(self):
         self.rect = self.rect.move(0, self.speed_y)
 
@@ -99,17 +103,127 @@ class Asteroids(pygame.sprite.Sprite):
         self.image = Asteroids.image
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(WINDOW_WIDTH)
-        self.rect.y = random.randrange(100, WINDOW_HEIGHT-300)
+        self.rect.y = random.randrange(100, WINDOW_HEIGHT - 300)
         # вычисляем маску для эффективного сравнения
         self.mask = pygame.mask.from_surface(self.image)
 
 
+# hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+def terminate():
+    pygame.quit()
+    sys.exit()
+
+
+def start_screen(screen, clock):
+    intro_text = ["                                                    SPACE-DEFENDER", "",
+                  "         Вы можете двигать пушку клавишами стрелочками на клавиатуре",
+                  "         и при нажатии на пробел совершать выстрел.",
+                  "         Если хотя бы один космический корабль опустится ниже уровня",
+                  "         вашей пушки, то тогда вы проиграете.",
+                  "         Если в течении всего времени игры вы сможете отбить ",
+                  "                 атаку всех кораблей, то вы победили.",
+                  "                                                         Удачи!   ",
+                  "                                             Для начала нажмите на экран"
+                  ]
+
+    fon = pygame.transform.scale(load_image('вид10.png'), (WINDOW_WIDTH, WINDOW_HEIGHT))
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 30)
+    text_coord = 100
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 30
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN or \
+                    event.type == pygame.MOUSEBUTTONDOWN:
+                return  # начинаем игру
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
+def end_screen(screen, clock):
+    intro_text = ["",
+                  "",
+                  "",
+                  "",
+                  "",
+                  "                                                  Игра окончена", ""
+                  ]
+
+    fon = pygame.transform.scale(load_image('вид10.png'), (WINDOW_WIDTH, WINDOW_HEIGHT))
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 30)
+    text_coord = 100
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 30
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            # elif event.type == pygame.KEYDOWN or \
+            #         event.type == pygame.MOUSEBUTTONDOWN:
+            #     return  # начинаем игру
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
+def win_screen(screen, clock):
+    intro_text = ["",
+                  "",
+                  "",
+                  "",
+                  "",
+                  "                                                  Вы выиграли"
+                  ]
+
+    fon = pygame.transform.scale(load_image('вид10.png'), (WINDOW_WIDTH, WINDOW_HEIGHT))
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 30)
+    text_coord = 100
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 30
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            # elif event.type == pygame.KEYDOWN or \
+            #         event.type == pygame.MOUSEBUTTONDOWN:
+            #     return  # начинаем игру
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
 def main():
+    esli_win = True
+    big_c = 0
     asteroids = pygame.sprite.Group()
     for _ in range(4):
         Asteroids(asteroids)
     ships = pygame.sprite.Group()
-    for _ in range(25):
+    for _ in range(10):
         Spaceships(ships)
     lasers = pygame.sprite.Group()
     flags = []
@@ -118,14 +232,17 @@ def main():
     pygame.init()
     pygame.display.set_caption('Space Defender')
     screen = pygame.display.set_mode(WINDOW_SIZE)
+    clock = pygame.time.Clock()
+    # jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj
+    start_screen(screen, clock)
     flag = False
 
     gun = Gun()
 
-    clock = pygame.time.Clock()
     running = True
 
     while running:
+        big_c += 1
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -140,9 +257,12 @@ def main():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 Laser((laser_x, laser_y), 0, lasers)
 
+        for g in ships:
+            # print(g.get_position())
+            if g.get_position() >= 720:  # Здесь координаты пушки и размер корабля
+                esli_win = False
         screen.fill((0, 0, 0))
         screen.blit(image, (0, 0))
-
         pygame.mouse.set_visible(False)
         if pygame.mouse.get_focused():
             screen.blit(load_image('cursor.png'), pygame.mouse.get_pos())
@@ -155,6 +275,9 @@ def main():
         asteroids.draw(screen)
         ships.update()
         lasers.update()
+        if (big_c % 110 == 0 and big_c != 0):
+            for _ in range(10):
+                Spaceships(ships)
         # если лазер попадает в корабль, то удаляем и пульку, и корабль
         pygame.sprite.groupcollide(lasers, ships, True, True)
         # Если лазер попадает в астероиды, то удаляем пульку
@@ -162,6 +285,11 @@ def main():
 
         pygame.display.flip()
         clock.tick(FPS)
+        if esli_win:
+            if big_c == 1000:
+                win_screen(screen, clock)
+        else:
+            end_screen(screen, clock)
     pygame.quit()
 
 
