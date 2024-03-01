@@ -1,2 +1,3 @@
-pygame
+pygame~=2.5.2
 Os-Maker
+python-dotenv~=1.0.1
